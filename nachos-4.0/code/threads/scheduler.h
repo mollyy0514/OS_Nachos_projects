@@ -27,6 +27,7 @@ enum SchedulerType {
 class Scheduler {
   public:
 	Scheduler();		// Initialize list of ready threads 
+	Scheduler(SchedulerType type); // 這個要改，加上參數
 	~Scheduler();				// De-allocate ready list
 
 	void ReadyToRun(Thread* thread);	
