@@ -105,7 +105,7 @@ bool SleepList::PutToReady()
     counter ++;
 
     // check all thread in the list if there are thread already finish sleeping
-    for(std::list<sleepthread>::iterator it = threadlist.begin();
+    for(std::list<SleepThread>::iterator it = threadlist.begin();
         it != threadlist.end(); )
     {
         // 'when' 就是被創造時的 counter 加上他要 sleep 的時間，也就是他應該醒來的時間
