@@ -23,6 +23,27 @@
 #include "scheduler.h"
 #include "main.h"
 
+// 加上 compare function (做 sortlist 的時候要用的)
+//----------------------------------------------------------------------
+// Compare function
+//----------------------------------------------------------------------
+int PriorityCompare(Thread *a, Thread *b) {
+    if(a->getPriority() == b->getPriority())
+        return 0;
+    return a->getPriority() > b->getPriority() ? 1 : -1;
+}
+
+int FIFOCompare(Thread *a, Thread *b) {
+    return 1;
+}
+
+int SJFCompare(Thread *a, Thread *b) {
+    if(a->getBurstTime() == b->getBurstTime())
+        return 0;
+    return a->getBurstTime() > b->getBurstTime() ? 1 : -1;
+}
+
+
 //----------------------------------------------------------------------
 // Scheduler::Scheduler
 // 	Initialize the list of ready but not running threads.
@@ -32,9 +53,31 @@
 Scheduler::Scheduler()
 {
 //	schedulerType = type;
-	readyList = new List<Thread *>; 
-	toBeDestroyed = NULL;
+	// readyList = new List<Thread *>; 
+	// toBeDestroyed = NULL;
+    Scheduler(RR);
 } 
+
+// 主要要自己動手的地方都在這裡而已
+Scheduler::Scheduler(SchedulerType type)
+{
+	schedulerType = type;
+	switch(schedulerType) {
+        case RR:
+            readyList = new List<Thread *>;
+            break;
+        case SJF:
+            readyList = new SortedList<Thread *>(SJFCompare);
+            break;
+        case Priority:
+            readyList = new SortedList<Thread *>(PriorityCompare);
+            break;
+        case FIFO:
+            readyList = new SortedList<Thread *>(FIFOCompare);
+            break;
+   	}
+	toBeDestroyed = NULL;
+}	 
 
 //----------------------------------------------------------------------
 // Scheduler::~Scheduler

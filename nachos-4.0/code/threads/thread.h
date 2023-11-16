@@ -107,6 +107,12 @@ class Thread {
     void Print() { cout << name; }
     void SelfTest();		// test whether thread impl is working
 
+    // 加上下面四個
+    void setBurstTime(int t)	{burstTime = t;}
+    int getBurstTime()		{return burstTime;}
+    void setPriority(int t)	{priority = t;}
+    int getPriority()		{return priority;}
+
   private:
     // some of the private data for this class is listed above
     
@@ -115,6 +121,10 @@ class Thread {
 				// (If NULL, don't deallocate stack)
     ThreadStatus status;	// ready, running or blocked
     char* name;
+
+    // 加上這兩個
+    int burstTime;
+    int priority;
 
     void StackAllocate(VoidFunctionPtr func, void *arg);
     				// Allocate a stack for thread.

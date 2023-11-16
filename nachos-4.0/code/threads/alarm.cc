@@ -61,3 +61,73 @@ Alarm::CallBack()
     }
 }
 
+// implement WaitUntil function.
+void 
+Alarm::WaitUntil(int x)
+{
+    // save previous setting as oldLevel and disable interrupt.
+    // SetLevel 是決定這個 thread 能不能被 interrupt
+    // 這裡是把原本的 level 存起來然後把當前設定成不能被 interrupt
+    IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
+    Thread* t = kernel->currentThread;
+    sleepList.PutToSleep(t, x);               // put current thread to sleep list.
+    kernel->interrupt->SetLevel(oldLevel);    // recover old interrupt state.
+}
+
+// check if there is still thread sleeping
+bool SleepList::IsEmpty()
+{
+    return threadlist.size() == 0;
+}
+
+// put the thread into sleep list
+void SleepList::PutToSleep(Thread*t, int x)
+{
+    // 2-3 打開
+    // IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff); // 不讓其他 thread 可以中斷
+    
+    // check if it cannot be interrupt.
+    ASSERT(kernel->interrupt->getLevel() == IntOff);
+    threadlist.push_back(SleepThread(t, counter + x));  // put into the list
+    t->Sleep(false);
+
+    // 2-3 打開
+    // kernel->interrupt->SetLevel(oldLevel);
+}
+
+// will be call in callback
+bool SleepList::PutToReady()
+{
+    // 2-3 打開
+    // IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
+    
+    bool woken = false;
+    counter ++;
+
+    // check all thread in the list if there are thread already finish sleeping
+    for(std::list<sleepthread>::iterator it = threadlist.begin();
+        it != threadlist.end(); )
+    {
+        // 'when' 就是被創造時的 counter 加上他要 sleep 的時間，也就是他應該醒來的時間
+        // 所以我們檢查 when 跟 counter 來判斷他該不該醒來
+        // 'when' is time the thread should wake up
+        // if counter >= when, this thread will be ready to run.
+        if(counter >= it->when)
+        {
+            // 若是他該醒來就把從睡覺 list 中去掉，然後把他叫醒 (用 ReadyToRun)
+            woken = true;
+            kernel->scheduler->ReadyToRun(it->sleeper);
+            it = threadlist.erase(it);
+        }
+        // if the thread is not ready to run, keep checking next thread in the list.
+        else
+        {
+            it++;
+        }
+    }
+
+    // 2-3 打開
+    // kernel->interrupt->SetLevel(oldLevel);
+    
+    return woken;
+}

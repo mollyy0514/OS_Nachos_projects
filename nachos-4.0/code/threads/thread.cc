@@ -409,16 +409,16 @@ Thread::RestoreUserState()
 //	purposes.
 //----------------------------------------------------------------------
 
-static void
-SimpleThread(int which)
-{
-    int num;
+// static void
+// SimpleThread(int which)
+// {
+//     int num;
     
-    for (num = 0; num < 5; num++) {
-	cout << "*** thread " << which << " looped " << num << " times\n";
-        kernel->currentThread->Yield();
-    }
-}
+//     for (num = 0; num < 5; num++) {
+// 	cout << "*** thread " << which << " looped " << num << " times\n";
+//         kernel->currentThread->Yield();
+//     }
+// }
 
 //----------------------------------------------------------------------
 // Thread::SelfTest
@@ -426,14 +426,53 @@ SimpleThread(int which)
 //	to call SimpleThread, and then calling SimpleThread ourselves.
 //----------------------------------------------------------------------
 
+// void
+// Thread::SelfTest()
+// {
+//     DEBUG(dbgThread, "Entering Thread::SelfTest");
+
+//     Thread *t = new Thread("forked thread");
+
+//     t->Fork((VoidFunctionPtr) SimpleThread, (void *) 1);
+//     SimpleThread(0);
+// }
+
+
+// 印出現在正在跑的 thread 的 [Name: BurstTime]
+static void
+SimpleThread()
+{
+    Thread *thread = kernel->currentThread;
+    while (thread->getBurstTime() > 0) {
+        thread->setBurstTime(thread->getBurstTime() - 1);
+        printf("%s: %d\n", kernel->currentThread->getName(), 
+                kernel->currentThread->getBurstTime());
+        kernel->interrupt->OneTick();
+    }
+}
+
+// 會初始化 thread 的資訊，然後還會 Call 到 SimpleThread()
 void
 Thread::SelfTest()
 {
     DEBUG(dbgThread, "Entering Thread::SelfTest");
 
-    Thread *t = new Thread("forked thread");
+    const int number     = 3;
+    char *name[number]   = {"A", "B", "C"};
+    int burst[number]    = {3, 10, 4};
+    int priority[number] = {4, 5, 3};
+    int arrive[number] = {3, 0, 5};
 
-    t->Fork((VoidFunctionPtr) SimpleThread, (void *) 1);
-    SimpleThread(0);
+    Thread *t;
+    for (int i = 0; i < number; i ++) {
+        t = new Thread(name[i]);
+        t->setPriority(priority[i]);
+        t->setBurstTime(burst[i]);
+        t->Fork((VoidFunctionPtr) SimpleThread, (void *)NULL);
+        // // SRTF 的部分，直接把還沒 arrive 的 thread 丟去 sleep 直到他 arrive 的時間到
+        // if(kernel->scheduler->getSchedulerType() == SRTF){
+        //     kernel->alarm->sleepList.PutToSleep(t,arrive[i]);
+        // }
+    }
+    kernel->currentThread->Yield();
 }
-

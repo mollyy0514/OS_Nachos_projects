@@ -21,6 +21,26 @@
 #include "utility.h"
 #include "callback.h"
 #include "timer.h"
+#include <list>
+#include "thread.h"
+
+class SleepList {
+    public:
+        SleepList():counter(0) {};
+        void PutToSleep(Thread *t, int x);
+    bool PutToReady();
+    bool IsEmpty();
+    private:
+        // 包含這個 thread 的 sleep 結束時間的物件
+        class SleepThread {
+            public:
+              SleepThread(Thread* t, int x):sleeper(t), when(x) {};
+              Thread* sleeper;
+              int when;    // 結束時間
+        };
+        int counter;    // 這個 counter 是不停累加上去的，每一次呼叫 PutToReady 都會增加
+        std::list<sleepthread> threadlist;    // 存放 sleep 中的 thread
+};
 
 // The following class defines a software alarm clock. 
 class Alarm : public CallBackObj {
@@ -31,6 +51,7 @@ class Alarm : public CallBackObj {
     
     void WaitUntil(int x);	// suspend execution until time > now + x
 
+    SleepList sleepList; // for implementing Sleep() function.
   private:
     Timer *timer;		// the hardware timer device
 

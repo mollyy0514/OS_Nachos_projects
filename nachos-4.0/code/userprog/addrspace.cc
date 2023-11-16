@@ -21,6 +21,7 @@
 #include "machine.h"
 #include "noff.h"
 
+bool AddrSpace::usedPhyPage[NumPhysPages] = {0};
 //----------------------------------------------------------------------
 // SwapHeader
 // 	Do little endian to big endian conversion on the bytes in the 
@@ -76,6 +77,8 @@ AddrSpace::AddrSpace()
 
 AddrSpace::~AddrSpace()
 {
+   for(int i = 0; i < numPages; i++)
+        AddrSpace::usedPhyPage[pageTable[i].physicalPage] = false;
    delete pageTable;
 }
 
@@ -106,6 +109,23 @@ AddrSpace::Load(char *fileName)
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
+/////////////////////////加上這一段////////////////////////////////////////
+    pageTable = new TranslationEntry[numPages];
+    for(unsigned int i = 0, j = 0; i < numPages; i++) {
+        pageTable[i].virtualPage = i;
+        
+        // 這裡是指一直往下找到沒有被用過的page為止
+        while(j < NumPhysPages && AddrSpace::usedPhyPage[j] == true)
+            j++;
+        // 找到以後就用這個沒被用過的page了
+        AddrSpace::usedPhyPage[j] = true;
+        pageTable[i].physicalPage = j;
+        pageTable[i].valid = true;
+        pageTable[i].use = false;
+        pageTable[i].dirty = false;
+        pageTable[i].readOnly = false;
+    }
+////////////////////////////////////////////////////////////////////////
 
 // how big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
@@ -127,15 +147,15 @@ AddrSpace::Load(char *fileName)
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
         	executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
-			noffH.code.size, noffH.code.inFileAddr);
+		&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]), 
+            noffH.code.size, noffH.code.inFileAddr);
     }
 	if (noffH.initData.size > 0) {
         DEBUG(dbgAddr, "Initializing data segment.");
 	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
+		&(kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]),
+            noffH.initData.size, noffH.initData.inFileAddr);
     }
 
     delete executable;			// close file

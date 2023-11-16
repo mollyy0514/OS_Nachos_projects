@@ -20,7 +20,8 @@
 enum SchedulerType {
         RR,     // Round Robin
         SJF,
-        Priority
+        Priority,
+		FIFO
 };
 
 class Scheduler {
@@ -39,7 +40,10 @@ class Scheduler {
 	void Print();			// Print contents of ready list
     
     // SelfTest for scheduler is implemented in class Thread
-    
+	// 加上
+    void setSchedulerType(SchedulerType t) {schedulerType = t;}
+	SchedulerType getSchedulerType() {return schedulerType;}
+  
   private:
 	SchedulerType schedulerType;
 	List<Thread *> *readyList;	// queue of threads that are ready to run,
