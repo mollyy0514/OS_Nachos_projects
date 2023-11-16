@@ -459,9 +459,9 @@ Thread::SelfTest()
 
     const int number     = 3;
     char *name[number]   = {"A", "B", "C"};
-    int burst[number]    = {3, 10, 4};
-    int priority[number] = {4, 5, 3};
-    int arrive[number] = {3, 0, 5};
+    int burst[number]    = {3, 8, 5};
+    int priority[number] = {5, 1, 4};
+    int arrive[number] = {1, 5, 0};
 
     Thread *t;
     for (int i = 0; i < number; i ++) {
