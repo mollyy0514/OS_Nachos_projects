@@ -109,6 +109,14 @@ AddrSpace::Load(char *fileName)
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
+
+// how big is address space?
+    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
+			+ UserStackSize;	// we need to increase the size
+						// to leave room for the stack
+    numPages = divRoundUp(size, PageSize);
+//	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
+
 /////////////////////////加上這一段////////////////////////////////////////
     pageTable = new TranslationEntry[numPages];
     for(unsigned int i = 0, j = 0; i < numPages; i++) {
@@ -127,14 +135,7 @@ AddrSpace::Load(char *fileName)
     }
 ////////////////////////////////////////////////////////////////////////
 
-// how big is address space?
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
-			+ UserStackSize;	// we need to increase the size
-						// to leave room for the stack
-    numPages = divRoundUp(size, PageSize);
-//	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
     size = numPages * PageSize;
-
     ASSERT(numPages <= NumPhysPages);		// check we're not trying
 						// to run anything too big --
 						// at least until we have
