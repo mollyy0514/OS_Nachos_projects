@@ -78,4 +78,4 @@ test_sleep: test_sleep.o start.o
 
 test_sleep2: test_sleep2.o start.o
 	$(LD) $(LDFLAGS) start.o test_sleep2.o -o test_sleep2.coff
-	../bin/coff2noff test_sleep.coff test_sleep
+	../bin/coff2noff test_sleep2.coff test_sleep2
