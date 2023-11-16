@@ -79,7 +79,7 @@ ExceptionHandler(ExceptionType which)
 			cout << "return value:" << val << endl;
 			kernel->currentThread->Finish();
 			break;
-		case SC_Example:
+		case SC_Sleep:
 			val=kernel->machine->ReadRegister(4);
 			cout << "Sleep time:" << val << endl;
 			kernel->alarm->WaitUntil(val);
