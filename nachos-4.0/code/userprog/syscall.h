@@ -47,6 +47,7 @@
 /* Stop Nachos, and print out performance stats */
 void Halt();		
  
+void Sleep(int number); 
 
 /* Address space control operations: Exit, Exec, and Join */
 

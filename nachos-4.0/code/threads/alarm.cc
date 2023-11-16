@@ -51,10 +51,13 @@ Alarm::CallBack()
 {
     Interrupt *interrupt = kernel->interrupt;
     MachineStatus status = interrupt->getStatus();
-    
-    if (status == IdleMode) {	// is it time to quit?
+    bool woken = sleepList.PutToReady();
+
+    // 多加上兩個條件，一個是檢查是否 woken，一個是檢查還有沒有正在 sleep 的 thread
+    // 若是都沒有就可以關掉 timer 了
+    if (status == IdleMode && !woken && sleepList.IsEmpty()) { // is it time to quit?
         if (!interrupt->AnyFutureInterrupts()) {
-	    timer->Disable();	// turn off the timer
+     timer->Disable(); // turn off the timer
 	}
     } else {			// there's someone to preempt
 	interrupt->YieldOnReturn();
