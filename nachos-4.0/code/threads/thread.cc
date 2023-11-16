@@ -459,7 +459,7 @@ Thread::SelfTest()
 
     const int number     = 3;
     char *name[number]   = {"A", "B", "C"};
-    int burst[number]    = {3, 8, 5};
+    int burst[number]    = {5, 8, 3};
     int priority[number] = {5, 1, 4};
     int arrive[number] = {1, 5, 0};
 
