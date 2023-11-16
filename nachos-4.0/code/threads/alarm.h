@@ -39,7 +39,7 @@ class SleepList {
               int when;    // 結束時間
         };
         int counter;    // 這個 counter 是不停累加上去的，每一次呼叫 PutToReady 都會增加
-        std::list<sleepthread> threadlist;    // 存放 sleep 中的 thread
+        std::list<SleepThread> threadlist;    // 存放 sleep 中的 thread
 };
 
 // The following class defines a software alarm clock. 
