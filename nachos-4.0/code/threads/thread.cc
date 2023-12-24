@@ -457,22 +457,36 @@ Thread::SelfTest()
 {
     DEBUG(dbgThread, "Entering Thread::SelfTest");
 
-    const int number     = 3;
-    char *name[number]   = {"A", "B", "C"};
-    int burst[number]    = {5, 8, 3};
-    int priority[number] = {5, 1, 4};
-    int arrive[number] = {1, 2, 3};
+    // const int number     = 3;
+    // char *name[number]   = {"A", "B", "C"};
+    // int burst[number]    = {5, 8, 3};
+    // int priority[number] = {5, 1, 4};
+    // int arrive[number] = {1, 2, 3};
+    // 
+    // Thread *t;
+    // for (int i = 0; i < number; i ++) {
+    //     t = new Thread(name[i]);
+    //     t->setPriority(priority[i]);
+    //     t->setBurstTime(burst[i]);
+    //     t->Fork((VoidFunctionPtr) SimpleThread, (void *)NULL);
+    //     // // SRTF 的部分，直接把還沒 arrive 的 thread 丟去 sleep 直到他 arrive 的時間到
+    //     // if(kernel->scheduler->getSchedulerType() == SRTF){
+    //     //     kernel->alarm->sleepList.PutToSleep(t,arrive[i]);
+    //     // }
+    // }
 
+    const int thread_num = 4;
+    char *name[thread_num] = {"A", "B", "C", "D"};
+    int thread_priority[thread_num] = {5, 1, 3, 2};
+    int thread_burst[thread_num] = {3, 9, 7, 3};
+    
     Thread *t;
-    for (int i = 0; i < number; i ++) {
+    for (int i = 0; i < thread_num; i ++) {
         t = new Thread(name[i]);
-        t->setPriority(priority[i]);
-        t->setBurstTime(burst[i]);
+        t->setPriority(thread_priority[i]);
+        t->setBurstTime(thread_burst[i]);
         t->Fork((VoidFunctionPtr) SimpleThread, (void *)NULL);
-        // // SRTF 的部分，直接把還沒 arrive 的 thread 丟去 sleep 直到他 arrive 的時間到
-        // if(kernel->scheduler->getSchedulerType() == SRTF){
-        //     kernel->alarm->sleepList.PutToSleep(t,arrive[i]);
-        // }
     }
+
     kernel->currentThread->Yield();
 }

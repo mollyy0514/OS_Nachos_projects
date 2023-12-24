@@ -19,6 +19,11 @@
 class SynchDisk;
 class UserProgKernel : public ThreadedKernel {
   public:
+  // HW3
+  // Create a new SynchDisk called SwapDisk to simulate the secondary storage
+    SynchDisk *SwapDisk;    // SwapDisk saves pages if main memory is not enough
+    bool debugUserProg;    // single step user program（從 private 換到 public）
+    
     UserProgKernel(int argc, char **argv);
 				// Interpret command line arguments
     ~UserProgKernel();		// deallocate the kernel
@@ -38,7 +43,7 @@ class UserProgKernel : public ThreadedKernel {
 #endif // FILESYS
 
   private:
-    bool debugUserProg;		// single step user program
+    // bool debugUserProg;		// single step user program
 	Thread* t[10];
 	char*	execfile[10];
 	int	execfileNum;

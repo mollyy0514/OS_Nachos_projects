@@ -89,6 +89,17 @@ ExceptionHandler(ExceptionType which)
  		    break;
 	    }
 	    break;
+
+	case PageFaultException:
+		// Fetch virtual address
+		int pageFaultAddr = kernel->machine->ReadRegister(BadVAddrReg);
+		// Fetch virtual page number from thread pageTable
+		int pageFaultNum = pageFaultAddr / PageSize;
+		// Check the free physical page number from main memory
+		int freePhyPageNum = ;
+		
+		return;
+
 	default:
 	    cerr << "Unexpected user mode exception" << which << "\n";
 	    break;

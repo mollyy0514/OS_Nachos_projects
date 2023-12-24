@@ -58,6 +58,8 @@ UserProgKernel::Initialize()
 
     machine = new Machine(debugUserProg);
     fileSystem = new FileSystem();
+	// HW3：swap disk for virtual memory
+	SwapDisk = new SynchDisk("New SwapDisk");
 #ifdef FILESYS
     synchDisk = new SynchDisk("New SynchDisk");
 #endif // FILESYS
