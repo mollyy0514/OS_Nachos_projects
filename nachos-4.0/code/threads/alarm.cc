@@ -114,7 +114,7 @@ void SleepList::PutToSleep(Thread*t, int x)
 bool SleepList::PutToReady()
 {
     // 2-3 打開
-    // IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
+    IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
     
     bool woken = false;
     counter ++;
@@ -142,7 +142,7 @@ bool SleepList::PutToReady()
     }
 
     // 2-3 打開
-    // kernel->interrupt->SetLevel(oldLevel);
+    kernel->interrupt->SetLevel(oldLevel);
     
     return woken;
 }

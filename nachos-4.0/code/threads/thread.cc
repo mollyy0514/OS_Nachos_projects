@@ -102,7 +102,12 @@ Thread::Fork(VoidFunctionPtr func, void *arg)
     StackAllocate(func, arg);
 
     oldLevel = interrupt->SetLevel(IntOff);
-    scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts 
+    /* 處理 SRTF 的方法 */
+    if(scheduler->getSchedulerType() != RR) { //因為他不一定一 fork 就可以 run
+        scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts are disabled!
+    }
+    /* 處理 SRTF 的方法 */
+    // scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts 
 					// are disabled!
     (void) interrupt->SetLevel(oldLevel);
 }    
@@ -212,8 +217,28 @@ Thread::Yield ()
     
     nextThread = kernel->scheduler->FindNextToRun();
     if (nextThread != NULL) {
-	kernel->scheduler->ReadyToRun(this);
-	kernel->scheduler->Run(nextThread, FALSE);
+        /* 原本的 */
+	    // kernel->scheduler->ReadyToRun(this);
+	    // kernel->scheduler->Run(nextThread, FALSE);
+        /* 原本的 */
+
+        /* 處理 SRTF 的方法 */
+        // 因為是 preemtive 所以每次的 yield 都要判斷會不會被中斷
+        // 有可能不會被中斷，所以不能像其他排程法一樣直接把 nextThread 丟到 ReadyToRun
+        if(kernel->scheduler->getSchedulerType() == RR){	
+            if(nextThread->getBurstTime() < this->getBurstTime()){
+                kernel->scheduler->ReadyToRun(this);
+                kernel->scheduler->Run(nextThread, FALSE);
+            }
+            else{
+                kernel->scheduler->ReadyToRun(nextThread);
+            }
+        }
+        else{
+            kernel->scheduler->ReadyToRun(this);
+            kernel->scheduler->Run(nextThread, FALSE);
+        }
+        /* 處理 SRTF 的方法 */
     }
     (void) kernel->interrupt->SetLevel(oldLevel);
 }
