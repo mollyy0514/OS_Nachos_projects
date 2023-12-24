@@ -60,8 +60,14 @@ Alarm::CallBack()
      timer->Disable(); // turn off the timer
 	}
     } else {			// there's someone to preempt
-	interrupt->YieldOnReturn();
+	// interrupt->YieldOnReturn();
+    /* Morris 寫法 */
+    if(kernel->scheduler->getSchedulerType() == RR || kernel->scheduler->getSchedulerType() == Priority ) {
+        cout << "=== interrupt->YieldOnReturn ===" << endl;
+        interrupt->YieldOnReturn();
+        }
     }
+    /* Morris 寫法 */
 }
 
 // implement WaitUntil function.
@@ -73,6 +79,11 @@ Alarm::WaitUntil(int x)
     // 這裡是把原本的 level 存起來然後把當前設定成不能被 interrupt
     IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
     Thread* t = kernel->currentThread;
+    /* Morris 寫法 */
+    int worktime = kernel->stats->userTicks - t->getStartTime();
+    t->setBurstTime(t->getBurstTime() + worktime);
+    t->setStartTime(kernel->stats->userTicks);
+    /* Morris 寫法 */
     sleepList.PutToSleep(t, x);               // put current thread to sleep list.
     kernel->interrupt->SetLevel(oldLevel);    // recover old interrupt state.
 }

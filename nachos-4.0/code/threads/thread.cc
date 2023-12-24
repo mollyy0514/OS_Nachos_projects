@@ -475,6 +475,7 @@ Thread::SelfTest()
     //     // }
     // }
 
+    /* Morris 寫法 */
     const int thread_num = 4;
     char *name[thread_num] = {"A", "B", "C", "D"};
     int thread_priority[thread_num] = {5, 1, 3, 2};
@@ -487,6 +488,7 @@ Thread::SelfTest()
         t->setBurstTime(thread_burst[i]);
         t->Fork((VoidFunctionPtr) SimpleThread, (void *)NULL);
     }
+     /* Morris 寫法 */
 
     kernel->currentThread->Yield();
 }

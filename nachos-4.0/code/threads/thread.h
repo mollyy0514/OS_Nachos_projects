@@ -112,6 +112,10 @@ class Thread {
     int getBurstTime()		{return burstTime;}
     void setPriority(int t)	{priority = t;}
     int getPriority()		{return priority;}
+    /* Morris 寫法 */
+    void setStartTime(int t)	{startTime = t;}
+    int getStartTime()		{return startTime;}
+    /* Morris 寫法 */
 
   private:
     // some of the private data for this class is listed above
@@ -125,6 +129,9 @@ class Thread {
     // 加上這兩個
     int burstTime;
     int priority;
+    /* Morris 寫法 */
+    int startTime;
+    /* Morris 寫法 */
 
     void StackAllocate(VoidFunctionPtr func, void *arg);
     				// Allocate a stack for thread.
