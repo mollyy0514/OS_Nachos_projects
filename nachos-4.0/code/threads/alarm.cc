@@ -62,7 +62,7 @@ Alarm::CallBack()
     } else {			// there's someone to preempt
 	// interrupt->YieldOnReturn();
     /* Morris 寫法 */
-    if(kernel->scheduler->getSchedulerType() == RR || kernel->scheduler->getSchedulerType() == Priority || kernel->scheduler->getSchedulerType() == FIFO) {
+    if(kernel->scheduler->getSchedulerType() == RR || kernel->scheduler->getSchedulerType() == Priority) {
         // 決定是否要呼叫 interrupt->YieldOnReturn() 查看是否有更需要優先的 process 要執行
         // cout << "=== interrupt->YieldOnReturn ===" << endl;
         interrupt->YieldOnReturn();
