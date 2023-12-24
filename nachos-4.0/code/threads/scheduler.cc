@@ -64,7 +64,7 @@ Scheduler::Scheduler(SchedulerType type)
 	schedulerType = type;
 	switch(schedulerType) {
         case RR:
-            readyList = new List<Thread *>;
+            readyList = new SortedList<Thread *>(FIFOCompare);
             break;
         case SJF:
             readyList = new SortedList<Thread *>(SJFCompare);
