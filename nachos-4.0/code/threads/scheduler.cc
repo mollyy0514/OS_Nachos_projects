@@ -66,7 +66,7 @@ Scheduler::Scheduler(SchedulerType type)
         case RR:
             // readyList = new List<Thread *>();
             /* Morris 的寫法 */
-            readyList = new SortedList<Thread *>(FIFOCompare)
+            readyList = new SortedList<Thread *>(FIFOCompare);
             /* Morris 的寫法 */
             break;
         case SJF:
