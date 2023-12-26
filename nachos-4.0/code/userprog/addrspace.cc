@@ -54,18 +54,23 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace()
 {
-    pageTable = new TranslationEntry[NumPhysPages];
-    for (unsigned int i = 0; i < NumPhysPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
-	pageTable[i].physicalPage = i;
-//	pageTable[i].physicalPage = 0;
-	pageTable[i].valid = TRUE;
-//	pageTable[i].valid = FALSE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  
-    }
-    
+    pageTable = new NewTranslationEntry[NumPhysPages];
+    /* HW3 註解掉 */
+//     for (unsigned int i = 0; i < NumPhysPages; i++) {
+// 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
+// 	pageTable[i].physicalPage = i;
+// //	pageTable[i].physicalPage = 0;
+// 	pageTable[i].valid = TRUE;
+// //	pageTable[i].valid = FALSE;
+// 	pageTable[i].use = FALSE;
+// 	pageTable[i].dirty = FALSE;
+// 	pageTable[i].readOnly = FALSE;  
+//     }
+    /* HW3 註解掉 */
+    /* HW3 */
+    ID = ID_number++;  // 我不知道是什麼
+    ID_number = ID_number++;
+    /* HW3 */
     // zero out the entire address space
 //    bzero(kernel->machine->mainMemory, MemorySize);
 }
@@ -77,8 +82,10 @@ AddrSpace::AddrSpace()
 
 AddrSpace::~AddrSpace()
 {
-   for(int i = 0; i < numPages; i++)
-        AddrSpace::usedPhyPage[pageTable[i].physicalPage] = false;
+    /* HW3 註解掉 */
+//    for(int i = 0; i < numPages; i++)
+//         AddrSpace::usedPhyPage[pageTable[i].physicalPage] = false;
+    /* HW3 註解掉 */
    delete pageTable;
 }
 
@@ -100,6 +107,10 @@ AddrSpace::Load(char *fileName)
     NoffHeader noffH;
     unsigned int size;
 
+    /* HW3 */
+    unsigned int tmp;
+    /* HW3 */
+
     if (executable == NULL) {
 	cerr << "Unable to open file " << fileName << "\n";
 	return FALSE;
@@ -116,47 +127,95 @@ AddrSpace::Load(char *fileName)
 						// to leave room for the stack
     numPages = divRoundUp(size, PageSize);
 //	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
-
+    
 /////////////////////////加上這一段////////////////////////////////////////
-    pageTable = new TranslationEntry[numPages];
-    for(unsigned int i = 0, j = 0; i < numPages; i++) {
-        pageTable[i].virtualPage = i;
+    pageTable = new NewTranslationEntry[numPages];
+    /* HW3 註解掉 */
+    // for(unsigned int i = 0, j = 0; i < numPages; i++) {
+    //     pageTable[i].virtualPage = i;
         
-        // 這裡是指一直往下找到沒有被用過的page為止
-        while(j < NumPhysPages && AddrSpace::usedPhyPage[j] == true)
-            j++;
-        // 找到以後就用這個沒被用過的page了
-        AddrSpace::usedPhyPage[j] = true;
-        pageTable[i].physicalPage = j;
-        pageTable[i].valid = true;
-        pageTable[i].use = false;
-        pageTable[i].dirty = false;
-        pageTable[i].readOnly = false;
-    }
+    //     // 這裡是指一直往下找到沒有被用過的page為止
+    //     while(j < NumPhysPages && AddrSpace::usedPhyPage[j] == true)
+    //         j++;
+    //     // 找到以後就用這個沒被用過的page了
+    //     AddrSpace::usedPhyPage[j] = true;
+    //     pageTable[i].physicalPage = j;
+    //     pageTable[i].valid = true;
+    //     pageTable[i].use = false;
+    //     pageTable[i].dirty = false;
+    //     pageTable[i].readOnly = false;
+    // }
+    /* HW3 註解掉 */
 ////////////////////////////////////////////////////////////////////////
 
     size = numPages * PageSize;
-    ASSERT(numPages <= NumPhysPages);		// check we're not trying
+    /* HW3 註解掉 */
+    // ASSERT(numPages <= NumPhysPages);		// check we're not trying
 						// to run anything too big --
 						// at least until we have
 						// virtual memory
-
+    /* HW3 註解掉 */
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
 // then, copy in the code and data segments into memory
 	if (noffH.code.size > 0) {
-        DEBUG(dbgAddr, "Initializing code segment.");
-	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
-        	executable->ReadAt(
-		&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]), 
-            noffH.code.size, noffH.code.inFileAddr);
+        /* HW3 註解掉 */
+    //     DEBUG(dbgAddr, "Initializing code segment.");
+	// DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
+    //     	executable->ReadAt(
+	// 	&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]), 
+    //         noffH.code.size, noffH.code.inFileAddr);
+        /* HW3 註解掉 */
+        /* HW3 */
+        for(unsigned int j=0,i=0;i < numPages ;i++) {
+            j = 0;
+            while(UsedPhyPage[j] != FALSE && j < NumPhysPages) {
+                j++;
+            }
+            // main memory is enough, put the page to main memory
+            if(j < NumPhysPages) {   
+                UsedPhyPage[j] = TRUE;
+                PhyPageInfo[j] = ID;
+                main_tab[j] = &pageTable[i];
+                pageTable[i].physicalPage = j;
+                pageTable[i].valid = TRUE;
+                pageTable[i].use = FALSE;
+                pageTable[i].dirty = FALSE;
+                pageTable[i].readOnly = FALSE;
+                pageTable[i].ID = ID;
+                pageTable[i].LRU_counter++; // LRU counter when save in memory
+                executable->ReadAt(&(kernel->machine->mainMemory[j*PageSize]),PageSize, noffH.code.inFileAddr+(i*PageSize));
+            }
+            else { // main memory is not enough, use virtual memory
+                char *buffer;
+                buffer = new char[PageSize];
+                tmp = 0;
+                while(UsedVirtualPage[tmp] != FALSE) {
+                    tmp++;
+                }
+                UsedVirtualPage[tmp] = TRUE;
+                pageTable[i].virtualPage = tmp; //record the virtual page we save 
+                pageTable[i].valid = FALSE; //not load in main memory
+                pageTable[i].use = FALSE;
+                pageTable[i].dirty = FALSE;
+                pageTable[i].readOnly = FALSE;
+                pageTable[i].ID = ID;
+                executable->ReadAt(buffer,PageSize, noffH.code.inFileAddr+(i*PageSize));
+                kernel->SwapDisk->WriteSector(tmp,buffer); // write in virtual memory (SwapDisk)
+            }
+        }
     }
 	if (noffH.initData.size > 0) {
-        DEBUG(dbgAddr, "Initializing data segment.");
-	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
-        executable->ReadAt(
-		&(kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]),
-            noffH.initData.size, noffH.initData.inFileAddr);
+        /* HW3 註解掉 */
+    //     DEBUG(dbgAddr, "Initializing data segment.");
+	// DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
+    //     executable->ReadAt(
+	// 	&(kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]),
+    //         noffH.initData.size, noffH.initData.inFileAddr);
+        /* HW3 註解掉 */
+        /* HW3 */
+        executable->ReadAt(&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),noffH.initData.size, noffH.initData.inFileAddr);
+        /* HW3 */
     }
 
     delete executable;			// close file
@@ -174,6 +233,9 @@ AddrSpace::Load(char *fileName)
 void 
 AddrSpace::Execute(char *fileName) 
 {
+    /* HW3 */
+    pageTable_is_load = FALSE;
+    /* HW3 */
     if (!Load(fileName)) {
 	cout << "inside !Load(FileName)" << endl;
 	return;				// executable not found
@@ -188,6 +250,9 @@ AddrSpace::Execute(char *fileName)
     ASSERTNOTREACHED();			// machine->Run never returns;
 					// the address space exits
 					// by doing the syscall "exit"
+    /* HW3 */
+    pageTable_is_load = TRUE;
+    /* HW3 */
 }
 
 
@@ -234,8 +299,16 @@ AddrSpace::InitRegisters()
 
 void AddrSpace::SaveState() 
 {
-        pageTable=kernel->machine->pageTable;
-        numPages=kernel->machine->pageTableSize;
+    /* HW3 註解掉 */
+        // pageTable=kernel->machine->pageTable;
+        // numPages=kernel->machine->pageTableSize;
+    /* HW3 註解掉 */
+    /* HW3 */
+    if(pageTable_is_load) {
+        pageTable = pageTable;
+        numPages = kernel->machine->pageTableSize;
+    }
+    /* HW3 */
 }
 
 //----------------------------------------------------------------------

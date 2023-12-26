@@ -91,13 +91,66 @@ ExceptionHandler(ExceptionType which)
 	    break;
 
 	case PageFaultException:
+		unsigned int j = 0;
+		int victim;
 		// Fetch virtual address
 		int pageFaultAddr = kernel->machine->ReadRegister(BadVAddrReg);
 		// Fetch virtual page number from thread pageTable
-		int pageFaultNum = pageFaultAddr / PageSize;
-		// Check the free physical page number from main memory
-		int freePhyPageNum = ;
-		
+		int vpn = pageFaultAddr / PageSize;
+		//check the free physical page number from main memory
+		int PPN = kernel->freeMap->FindAndSet();  // 找尋 free block space
+		//Fetch page entry of current thread [by VPN(pageFaultNum)]
+		kernel->stats->numPageFaults++; // page fault
+
+		while(UsedPhyPage[j] != FALSE && j < NumPhysPages){
+			j++;
+		}
+		// load the page into the main memory if the main memory is not full  
+		if(j < NumPhysPages) {
+			char *buffer; //temporary save page 
+			buffer = new char[PageSize];
+			UsedPhyPage[j]=TRUE;
+			PhyPageInfo[j]=pageTable[vpn].ID;
+			main_tab[j]=&pageTable[vpn];
+			pageTable[vpn].physicalPage = j;
+			pageTable[vpn].valid = TRUE;
+			pageTable[vpn].LRU_counter++; // counter for LRU
+
+			kernel->SwapDisk->ReadSector(pageTable[vpn].virtualPage, buffer);
+			bcopy(buffer,&mainMemory[j*PageSize],PageSize);
+		}
+		else {
+			char *buffer1;
+			char *buffer2;
+			buffer1 = new char[PageSize];
+			buffer2 = new char[PageSize];
+
+			// LRU
+			int min = pageTable[0].LRU_counter;
+			victim=0;
+			for(int index=0; index < 32; index++) {
+				if(min > pageTable[index].LRU_counter) {
+					min = pageTable[index].LRU_counter;
+					victim = index;
+				}
+			}
+			pageTable[victim].LRU_counter++;
+
+			// perform page replacement, write victim frame to disk, read desired frame to memory
+			bcopy(&mainMemory[victim*PageSize],buffer1,PageSize);
+			kernel->SwapDisk->ReadSector(pageTable[vpn].virtualPage, buffer2);
+			bcopy(buffer2,&mainMemory[victim*PageSize],PageSize);
+			kernel->SwapDisk->WriteSector(pageTable[vpn].virtualPage,buffer1);
+
+			main_tab[victim]->virtualPage=pageTable[vpn].virtualPage;
+			main_tab[victim]->valid=FALSE;
+
+			pageTable[vpn].valid = TRUE;
+			pageTable[vpn].physicalPage=victim;
+			PhyPageInfo[victim]=pageTable[vpn].ID;
+			main_tab[victim]=&pageTable[vpn];
+		}
+
 		return;
 
 	default:

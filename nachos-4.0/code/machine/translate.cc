@@ -207,26 +207,27 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
     offset = (unsigned) virtAddr % PageSize;
     
     if (tlb == NULL) {		// => page table => vpn is index into table
-	if (vpn >= pageTableSize) {
-	    DEBUG(dbgAddr, "Illegal virtual page # " << virtAddr);
-	    return AddressErrorException;
-	} else if (!pageTable[vpn].valid) {
-	    DEBUG(dbgAddr, "Invalid virtual page # " << virtAddr);
-	    return PageFaultException;
-	}
-	entry = &pageTable[vpn];
-    } else {
+		if (vpn >= pageTableSize) {
+			DEBUG(dbgAddr, "Illegal virtual page # " << virtAddr);
+			return AddressErrorException;
+		} else if (!pageTable[vpn].valid) {
+			DEBUG(dbgAddr, "Invalid virtual page # " << virtAddr);
+			return PageFaultException;
+		}
+		entry = &pageTable[vpn];
+    } 
+	else {
         for (entry = NULL, i = 0; i < TLBSize; i++)
     	    if (tlb[i].valid && (tlb[i].virtualPage == vpn)) {
 		entry = &tlb[i];			// FOUND!
 		break;
 	    }
-	if (entry == NULL) {				// not found
-    	    DEBUG(dbgAddr, "Invalid TLB entry for this virtual page!");
-    	    return PageFaultException;		// really, this is a TLB fault,
-						// the page may be in memory,
-						// but not in the TLB
-	}
+		if (entry == NULL) {				// not found
+				DEBUG(dbgAddr, "Invalid TLB entry for this virtual page!");
+				return PageFaultException;		// really, this is a TLB fault,
+							// the page may be in memory,
+							// but not in the TLB
+		}
     }
 
     if (entry->readOnly && writing) {	// trying to write to a read-only page

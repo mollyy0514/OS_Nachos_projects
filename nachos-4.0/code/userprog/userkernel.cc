@@ -60,9 +60,9 @@ UserProgKernel::Initialize()
     fileSystem = new FileSystem();
 	// HW3：swap disk for virtual memory
 	SwapDisk = new SynchDisk("New SwapDisk");
-#ifdef FILESYS
-    synchDisk = new SynchDisk("New SynchDisk");
-#endif // FILESYS
+	#ifdef FILESYS
+		synchDisk = new SynchDisk("New SynchDisk");
+	#endif // FILESYS
 }
 
 //----------------------------------------------------------------------
