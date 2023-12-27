@@ -17,9 +17,6 @@
 #include "filesys.h"
 #include <string.h>
 
-/* HW3 */
-#include "machine.h"
-/* HW3 */
 
 #define UserStackSize		1024 	// increase this as necessary!
 
@@ -51,7 +48,7 @@ class AddrSpace {
     int PhyPageInfo[NumPhysPages]; // record physical page info (ID)
     TranslationEntry *main_tab[NumPhysPages]; // page table
     int ID;
-    LRUCnt LRU_table[PageSize];
+    LRUCnt LRU_table[NumPhysPages];
     /* HW3 */
   private:
     /* HW3 我試著把他移到 public */
