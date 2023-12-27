@@ -17,27 +17,17 @@
 #include "filesys.h"
 #include <string.h>
 
+/* HW3 */
+#include "machine.h"
+/* HW3 */
+
 #define UserStackSize		1024 	// increase this as necessary!
 
 /* HW3 */
-class NewTranslationEntry {
+class LRUCnt {
   public:
-    unsigned int virtualPage;  	// The page number in virtual memory.
-    unsigned int physicalPage;  // The page number in real memory (relative to the
-			//  start of "mainMemory"
-    bool valid;         // If this bit is set, the translation is ignored.
-			// (In other words, the entry hasn't been initialized.)
-    bool readOnly;	// If this bit is set, the user program is not allowed
-			// to modify the contents of the page.
-    bool use;           // This bit is set by the hardware every time the
-			// page is referenced or modified.
-    bool dirty;         // This bit is set by the hardware every time the
-			// page is modified.
-    /* HW3 自己加 */
     int LRU_counter;    // counter for LRU
     int ID;             // page table ID
-    /* HW3 自己加 */
-
 };
 /* HW3 */
 
@@ -54,13 +44,14 @@ class AddrSpace {
 
     static bool usedPhyPage[NumPhysPages];
     /* HW3 */
-    NewTranslationEntry *pageTable;
+    TranslationEntry *pageTable;
     bool UsedPhyPage[NumPhysPages]; 
-    bool UsedVirtualPage[NumPhysPages]; //record the pages in the virtual memory
+    bool UsedVirtualPage[NumPhysPages]; // record the pages in the virtual memory
     int ID_number; // machine ID
-    int PhyPageInfo[NumPhysPages]; //record physical page info (ID)
-    NewTranslationEntry *main_tab[NumPhysPages]; // pagetable
+    int PhyPageInfo[NumPhysPages]; // record physical page info (ID)
+    TranslationEntry *main_tab[NumPhysPages]; // page table
     int ID;
+    LRUCnt LRU_table[PageSize];
     /* HW3 */
   private:
     /* HW3 我試著把他移到 public */

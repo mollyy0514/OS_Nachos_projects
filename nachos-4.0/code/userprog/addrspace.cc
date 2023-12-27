@@ -54,7 +54,7 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace()
 {
-    pageTable = new NewTranslationEntry[NumPhysPages];
+    pageTable = new TranslationEntry[NumPhysPages];
     /* HW3 註解掉 */
 //     for (unsigned int i = 0; i < NumPhysPages; i++) {
 // 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
@@ -129,7 +129,7 @@ AddrSpace::Load(char *fileName)
 //	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
     
 /////////////////////////加上這一段////////////////////////////////////////
-    pageTable = new NewTranslationEntry[numPages];
+    pageTable = new TranslationEntry[numPages];
     /* HW3 註解掉 */
     // for(unsigned int i = 0, j = 0; i < numPages; i++) {
     //     pageTable[i].virtualPage = i;
@@ -182,8 +182,8 @@ AddrSpace::Load(char *fileName)
                 pageTable[i].use = FALSE;
                 pageTable[i].dirty = FALSE;
                 pageTable[i].readOnly = FALSE;
-                pageTable[i].ID = ID;
-                pageTable[i].LRU_counter++; // LRU counter when save in memory
+                LRU_table[i].ID = ID;
+                LRU_table[i].LRU_counter++; // LRU counter when save in memory
                 executable->ReadAt(&(kernel->machine->mainMemory[j*PageSize]),PageSize, noffH.code.inFileAddr+(i*PageSize));
             }
             else { // main memory is not enough, use virtual memory
@@ -199,7 +199,7 @@ AddrSpace::Load(char *fileName)
                 pageTable[i].use = FALSE;
                 pageTable[i].dirty = FALSE;
                 pageTable[i].readOnly = FALSE;
-                pageTable[i].ID = ID;
+                LRU_table[i].ID = ID;
                 executable->ReadAt(buffer,PageSize, noffH.code.inFileAddr+(i*PageSize));
                 kernel->SwapDisk->WriteSector(tmp,buffer); // write in virtual memory (SwapDisk)
             }
@@ -305,7 +305,7 @@ void AddrSpace::SaveState()
     /* HW3 註解掉 */
     /* HW3 */
     if(pageTable_is_load) {
-        pageTable = pageTable;
+        pageTable = kernel->machine->pageTable;
         numPages = kernel->machine->pageTableSize;
     }
     /* HW3 */
